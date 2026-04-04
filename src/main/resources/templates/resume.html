@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Resume</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.5in;
+        }
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 11pt;
+            line-height: 1.3;
+            color: #000;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .name {
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .contact {
+            font-size: 10pt;
+        }
+        .contact a {
+            color: #0000EE;
+            text-decoration: none;
+        }
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            padding-bottom: 2px;
+        }
+        .objective {
+            margin-bottom: 10px;
+        }
+        .item-row {
+            width: 100%;
+            margin-bottom: 3px;
+        }
+        .item-left {
+            font-weight: bold;
+            float: left;
+        }
+        .item-right {
+           float: right;
+        }
+        .item-sub {
+            font-style: italic;
+            clear: both;
+        }
+        ul {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 3px;
+        }
+        .clear {
+            clear: both;
+        }
+        .divider {
+            padding: 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="name" th:text="${resume.name}">Candidate Name</div>
+        <div class="contact" th:if="${resume.contact != null}">
+            <span th:if="${resume.contact.phone != null and !resume.contact.phone.isEmpty()}">
+                <span th:text="${resume.contact.phone}"></span><span class="divider">|</span>
+            </span>
+            <span th:if="${resume.contact.email != null and !resume.contact.email.isEmpty()}">
+                <a th:href="'mailto:' + ${resume.contact.email}" th:text="${resume.contact.email}"></a><span class="divider">|</span>
+            </span>
+            <span th:if="${resume.contact.linkedin != null and !resume.contact.linkedin.isEmpty()}">
+                <a th:href="${resume.contact.linkedin}">LinkedIn</a><span class="divider">|</span>
+            </span>
+            <span th:if="${resume.contact.github != null and !resume.contact.github.isEmpty()}">
+                <a th:href="${resume.contact.github}">GitHub</a>
+            </span>
+        </div>
+    </div>
+
+    <div th:if="${resume.objective != null and !resume.objective.isEmpty()}">
+        <div class="section-title">Objective</div>
+        <div class="objective" th:text="${resume.objective}"></div>
+    </div>
+
+    <div th:if="${resume.education != null and !#lists.isEmpty(resume.education)}">
+        <div class="section-title">Education</div>
+        <div th:each="edu : ${resume.education}">
+            <div class="item-row">
+                <span class="item-left">
+                    <span th:text="${edu.degree}"></span> - <span th:text="${edu.institution}"></span>
+                </span>
+                <span class="item-right" th:text="${edu.date}"></span>
+                <div class="clear"></div>
+            </div>
+            <div th:if="${edu.gpa != null and !edu.gpa.isEmpty()}">CGPA: <span th:text="${edu.gpa}"></span></div>
+            <div th:if="${edu.coursework != null and !edu.coursework.isEmpty()}">Relevant Coursework: <span th:text="${edu.coursework}"></span></div>
+            <br/>
+        </div>
+    </div>
+
+    <div th:if="${resume.skills != null and !#lists.isEmpty(resume.skills)}">
+        <div class="section-title">Skills</div>
+        <ul>
+            <li th:each="skill : ${resume.skills}" th:text="${skill}"></li>
+        </ul>
+    </div>
+
+    <div th:if="${resume.projects != null and !#lists.isEmpty(resume.projects)}">
+        <div class="section-title">Projects</div>
+        <div th:each="proj : ${resume.projects}">
+            <div class="item-row">
+                <span class="item-left" th:text="${proj.name}"></span>
+                <span class="item-right">
+                    <a th:if="${proj.link != null and !proj.link.isEmpty()}" th:href="${proj.link}">Live Demo</a>
+                </span>
+                <div class="clear"></div>
+            </div>
+            <div class="item-sub" th:if="${proj.techStack != null and !proj.techStack.isEmpty()}">Tech Stack: <span th:text="${proj.techStack}"></span></div>
+            <ul th:if="${proj.items != null and !#lists.isEmpty(proj.items)}">
+                <li th:each="item : ${proj.items}" th:text="${item}"></li>
+            </ul>
+        </div>
+    </div>
+
+    <div th:if="${resume.experience != null and !#lists.isEmpty(resume.experience)}">
+        <div class="section-title">Experience</div>
+        <div th:each="exp : ${resume.experience}">
+            <div class="item-row">
+                <span class="item-left">
+                    <span th:text="${exp.title}"></span>, <span th:text="${exp.company}"></span>
+                </span>
+                <span class="item-right" th:text="${exp.date}"></span>
+                <div class="clear"></div>
+            </div>
+            <ul th:if="${exp.items != null and !#lists.isEmpty(exp.items)}">
+                <li th:each="item : ${exp.items}" th:text="${item}"></li>
+            </ul>
+        </div>
+    </div>
+
+    <div th:if="${resume.achievements != null and !#lists.isEmpty(resume.achievements)}">
+        <div class="section-title">Achievements</div>
+        <ul>
+            <li th:each="achieve : ${resume.achievements}" th:text="${achieve}"></li>
+        </ul>
+    </div>
+
+</body>
+</html>
