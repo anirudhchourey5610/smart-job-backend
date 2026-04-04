@@ -50,6 +50,8 @@ public class FileParserController {
                     .headers(headers)
                     .body(pdfBytes);
         } catch (Exception e) {
+            System.err.println("PDF Generation failed: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }

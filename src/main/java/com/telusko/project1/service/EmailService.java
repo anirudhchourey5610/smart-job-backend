@@ -60,23 +60,18 @@ public class EmailService {
         }
     }
 
-    public void sendEmailWithPdfAttachment(String to, String subject, String body, byte[] pdfBytes) {
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public void sendEmailWithPdfAttachment(String to, String subject, String body, byte[] pdfBytes) throws MessagingException {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(body);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body);
 
-            org.springframework.core.io.ByteArrayResource resource = new org.springframework.core.io.ByteArrayResource(pdfBytes);
-            helper.addAttachment("Optimized_Resume.pdf", resource);
+        org.springframework.core.io.ByteArrayResource resource = new org.springframework.core.io.ByteArrayResource(pdfBytes);
+        helper.addAttachment("Optimized_Resume.pdf", resource);
 
-            javaMailSender.send(message);
-
-        } catch (MessagingException e) {
-            System.out.println("Failed to send the optimized email: " + e.getMessage());
-        }
+        javaMailSender.send(message);
     }
 
 }

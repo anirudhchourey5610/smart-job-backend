@@ -33,6 +33,7 @@ public class PdfRenderService {
         // 4. Convert HTML to PDF using Flying Saucer
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             ITextRenderer renderer = new ITextRenderer();
+            
             // Flying saucer requires strict XHTML
             renderer.setDocumentFromString(htmlContent);
             renderer.layout();
