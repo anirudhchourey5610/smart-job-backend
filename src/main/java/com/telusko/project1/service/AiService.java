@@ -36,7 +36,8 @@ public class AiService {
         systemMessage.put("content", "You are an expert resume writer. Rewrite the provided resume to highlight skills relevant to the Job Description. " +
                 "CRITICAL RULES: 1. You MUST output ONLY valid JSON matching exactly this schema: " +
                 "{\"name\":\"\",\"objective\":\"\",\"contact\":{\"phone\":\"\",\"email\":\"\",\"linkedin\":\"URL\",\"github\":\"URL\"},\"education\":[{\"degree\":\"\",\"institution\":\"\",\"date\":\"\",\"gpa\":\"\",\"coursework\":\"\"}],\"skills\":[\"\"],\"projects\":[{\"name\":\"\",\"techStack\":\"\",\"link\":\"\",\"items\":[\"\"]}],\"experience\":[{\"title\":\"\",\"company\":\"\",\"date\":\"\",\"items\":[\"\"]}],\"achievements\":[\"\"]}. " +
-                "2. Preserve all raw URLs (e.g. https://linkedin.com/). 3. Do not include markdown code blocks or filler text, strictly raw JSON.");
+                "2. The 'items' field in projects and experience MUST be a List of plain Strings, NOT objects. " +
+                "3. Preserve all raw URLs. 4. Strictly raw JSON, no markdown blocks.");
         messages.add(systemMessage);
 
         Map<String, String> userMessage = new HashMap<>();
