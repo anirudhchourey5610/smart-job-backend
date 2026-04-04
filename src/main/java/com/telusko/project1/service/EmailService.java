@@ -3,75 +3,99 @@ package com.telusko.project1.service;
 import com.telusko.project1.model.EmailLog;
 import com.telusko.project1.repository.EmailLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import java.io.File;
+import java.nio.file.Files;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender javaMailSender;
-    
+    @Value("${resend.api.key}")
+    private String resendApiKey;
+
     @Autowired
     private EmailLogRepository emailLogRepository;
 
+    private final String RESEND_API_URL = "https://api.resend.com/emails";
+
     public void sendSimpleEmail(String toEmail, String subject, String body) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + resendApiKey);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("uchourey16@gmail.com");
-        message.setSubject("Application for Software Developer at SoftSolutions – Lion");
-        message.setText("Dear Hiring Manager,\n" +
-                "\n" +
-                "I hope you are doing well. I am writing to express my interest in the Software Developer position at SoftSolutions. I believe my skills and background align well with the requirements of this role.\n" +
-                "\n" +
-                "Please find my resume attached for your review. I would welcome the opportunity to discuss how I can contribute to your team.\n" +
-                "\n" +
-                "Thank you for your time and consideration.\n" +
-                "\n" +
-                "Best regards,\n" +
-                "Lion");
-          message.setFrom("a27792652@gmail.com");
-        javaMailSender.send(message);
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("from", "AI Resume <onboarding@resend.dev>");
+            payload.put("to", toEmail);
+            payload.put("subject", subject);
+            payload.put("html", body);
 
-        System.out.println("Mail sent successfully to: " + toEmail);
+            org.springframework.http.HttpEntity<Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(payload, headers);
+            restTemplate.postForLocation(RESEND_API_URL, entity);
+            System.out.println("Simple email sent via Resend API to: " + toEmail);
+        } catch (Exception e) {
+            System.err.println("Failed to send simple email via Resend API: " + e.getMessage());
+        }
     }
 
-    public void sendEmailWithAttachment(String to, String subject, String body, String attachmentFilePath) {
+    public void sendEmailWithFileAttachment(String to, String subject, String body, String filePath) {
         try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(body);
-
-            org.springframework.core.io.FileSystemResource file = new org.springframework.core.io.FileSystemResource(new java.io.File(attachmentFilePath));
-            helper.addAttachment(file.getFilename(), file);
-
-            javaMailSender.send(message);
-        } catch (MessagingException e) {
-            System.out.println("Failed to send email with attachment: " + e.getMessage());
+            File file = new java.io.File(filePath);
+            if (!file.exists()) {
+                System.err.println("Attachment file not found: " + filePath);
+                sendSimpleEmail(to, subject, body);
+                return;
+            }
+            byte[] fileBytes = java.nio.file.Files.readAllBytes(file.toPath());
+            sendEmailWithPdfAttachment(to, subject, body, fileBytes);
+        } catch (Exception e) {
+            System.err.println("Failed to read attachment file: " + e.getMessage());
+            sendSimpleEmail(to, subject, body);
         }
     }
 
     public void sendEmailWithPdfAttachment(String to, String subject, String body, byte[] pdfBytes) throws MessagingException {
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            
+            // Prepare Headers
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + resendApiKey);
 
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(body);
+            // Prepare Attachment (Base64)
+            String base64Content = java.util.Base64.getEncoder().encodeToString(pdfBytes);
 
-        org.springframework.core.io.ByteArrayResource resource = new org.springframework.core.io.ByteArrayResource(pdfBytes);
-        helper.addAttachment("Optimized_Resume.pdf", resource);
+            // Prepare Payload
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("from", "AI Resume <onboarding@resend.dev>");
+            payload.put("to", to);
+            payload.put("subject", subject);
+            payload.put("html", body);
+            
+            java.util.Map<String, String> attachment = new java.util.HashMap<>();
+            attachment.put("content", base64Content);
+            attachment.put("filename", "Optimized_Resume.pdf");
+            
+            payload.put("attachments", java.util.Collections.singletonList(attachment));
 
-        javaMailSender.send(message);
+            org.springframework.http.HttpEntity<java.util.Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(payload, headers);
+            
+            restTemplate.postForLocation(RESEND_API_URL, entity);
+            System.out.println("Email sent successfully via Resend API to: " + to);
+            
+        } catch (Exception e) {
+            System.err.println("Failed to send email via Resend API: " + e.getMessage());
+            throw new MessagingException("API Email Failed: " + e.getMessage());
+        }
     }
 
 }

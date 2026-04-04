@@ -42,7 +42,7 @@ public class JobApplicationService {
                  .replace("Applicant", candidateName);
         String resumeFilePath = jobApplication.getResumeFileName();
         try {
-            emailService.sendEmailWithAttachment(jobApplication.getHrEmail(), dynamicSubject, dynamicBody, resumeFilePath);
+            emailService.sendEmailWithFileAttachment(jobApplication.getHrEmail(), dynamicSubject, dynamicBody, resumeFilePath);
         } catch (Exception e) {
             System.out.println("Error sending email: " + e.getMessage());
         }
