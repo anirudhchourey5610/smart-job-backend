@@ -1,0 +1,17 @@
+target/
+.mvn/
+mvnw
+mvnw.cmd
+.gitignore
+.idea/
+.vscode/
+*.iml
+Dockerfile
+.dockerignore
+uploads/
+nbactions.xml
+nb-configuration.xml
+.project
+.classpath
+.settings/
+.DS_Store
