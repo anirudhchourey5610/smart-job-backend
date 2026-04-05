@@ -4,6 +4,8 @@ import com.telusko.project1.model.User;
 import com.telusko.project1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.telusko.project1.exception.EmailAlreadyExistsException;
+import com.telusko.project1.exception.InvalidUserDataException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -18,14 +20,14 @@ public class UserService {
 
     public User registerUser(User user) {
         if (user.getEmail() == null || user.getPassword() == null) {
-            throw new RuntimeException("Email and Password are required.");
+            throw new InvalidUserDataException("Email and Password are required.");
         }
         String lowerEmail = user.getEmail().toLowerCase();
         
         // Prevent duplicate registrations from crashing the database
         if (userRepository.findFirstByEmail(lowerEmail) != null) {
             System.err.println("Registration blocked: Email already exists - " + lowerEmail);
-            throw new RuntimeException("Email already signed up.");
+            throw new EmailAlreadyExistsException("Email already signed up.");
         }
         user.setEmail(lowerEmail);
         
