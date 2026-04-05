@@ -17,8 +17,16 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return userService.registerUser(user);
+    public ResponseEntity<?> register(@RequestBody User user) {
+        System.out.println("Radar: Processing registration request for email: " + user.getEmail() + " | Name: " + user.getName());
+        try {
+            User registeredUser = userService.registerUser(user);
+            return ResponseEntity.status(201).body(registeredUser);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(400).body(errorResponse);
+        }
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {

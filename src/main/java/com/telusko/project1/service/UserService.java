@@ -17,6 +17,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User registerUser(User user) {
+        if (user.getEmail() == null || user.getPassword() == null) {
+            throw new RuntimeException("Email and Password are required.");
+        }
         String lowerEmail = user.getEmail().toLowerCase();
         
         // Prevent duplicate registrations from crashing the database
